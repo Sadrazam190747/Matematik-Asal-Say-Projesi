@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=none">
+    <title>Matematik Proje Ödevi - Asal Sayı Oyunu</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            text-align: center;
+            width: 85%;
+            max-width: 400px;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #4facfe;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .yapimci {
+            font-size: 16px;
+            color: #00f2fe;
+            margin-bottom: 30px;
+            font-style: italic;
+            font-weight: bold;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.4);
+            transition: transform 0.2s, opacity 0.2s;
+            width: 100%;
+            margin: 10px 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-asal { background: linear-gradient(135deg, #11998e, #38ef7d); box-shadow: 0 4px 15px rgba(56, 239, 125, 0.4); }
+        .btn-degil { background: linear-gradient(135deg, #cb2d3e, #ef473a); box-shadow: 0 4px 15px rgba(239, 71, 58, 0.4); }
+
+        #soru-alani, #sonuc-alani {
+            display: none;
+        }
+
+        .sayi-kutusu {
+            font-size: 72px;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #fff;
+            text-shadow: 0 0 20px rgba(255,255,255,0.4);
+        }
+
+        .skor-bilgi {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #e0e0e0;
+        }
+
+        .durum-mesaji {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff4757;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- GİRİŞ EKRANI -->
+        <div id="giris-ekrani">
+            <h1>Asal Sayı Bulma Oyunu</h1>
+            <div class="yapimci">Yapımcı: Emirhan Cesuroğlu</div>
+            <p style="font-size: 14px; color: #ccc; margin-bottom: 20px;">10. Sınıf Matematik Proje Ödevi</p>
+            <button class="btn" onclick="oyunuBaslat()">BAŞLA</button>
+        </div>
+
+        <!-- OYUN ALANI -->
+        <div id="soru-alani">
+            <div class="skor-bilgi">Soru: <span id="soru-no">1</span>/20 | Skor: <span id="skor">0</span></div>
+            <p>Aşağıdaki sayı asal mı?</p>
+            <div class="sayi-kutusu" id="sayi-gosterge">7</div>
+            <button class="btn btn-asal" onclick="cevapVer(true)">ASAL</button>
+            <button class="btn btn-degil" onclick="cevapVer(false)">ASAL DEĞİL</button>
+        </div>
+
+        <!-- SONUÇ EKRANI -->
+        <div id="sonuc-alani">
+            <div class="durum-mesaji" id="sonuc-baslik">KAYBETTİNİZ!</div>
+            <div class="skor-bilgi" id="sonuc-skor">Toplam Skorun: 0</div>
+            <button class="btn" onclick="yenidenBaslat()">Yeniden Oyna</button>
+        </div>
+    </div>
+
+    <script>
+        let skor = 0;
+        let mevcutSoruNo = 1;
+        let mevcutSayi = 0;
+        const toplamSoru = 20;
+
+        // Asal sayı kontrol fonksiyonu
+        function asalMi(num) {
+            if (num <= 1) return false;
+            for (let i = 2; i <= Math.sqrt(num); i++) {
+                if (num % i === 0) return false;
+            }
+            return true;
+        }
+
+        // Rastgele sayı üretme (Hem asal hem bileşik sayı dengesi için)
+        function rastgeleSayiUret() {
+            // Öğretmenin çok zorlanmaması ve oyunun akıcı olması için 2 ile 100 arası sayılar
+            return Math.floor(Math.random() * 99) + 2;
+        }
+
+        function oyunuBaslat() {
+            document.getElementById('giris-ekrani').style.display = 'none';
+            document.getElementById('sonuc-alani').style.display = 'none';
+            document.getElementById('soru-alani').style.display = 'block';
+            skor = 0;
+            mevcutSoruNo = 1;
+            soruSor();
+        }
+
+        function soruSor() {
+            document.getElementById('skor').innerText = skor;
+            document.getElementById('soru-no').innerText = mevcutSoruNo;
+            mevcutSayi = rastgeleSayiUret();
+            document.getElementById('sayi-gosterge').innerText = mevcutSayi;
+        }
+
+        function cevapVer(oyuncuCevabi) {
+            let dogruCevap = asalMi(mevcutSayi);
+
+            if (oyuncuCevabi === dogruCevap) {
+                // Doğru cevap durumu
+                skor += 10; // Her doğru cevap 10 puan
+                mevcutSoruNo++;
+
+                if (mevcutSoruNo > toplamSoru) {
+                    oyunBitti(true); // 20 soruyu da doğru bildi, kazandı!
+                } else {
+                    soruSor();
+                }
+            } else {
+                // Yanlış cevap durumu - Kaybetti
+                oyunBitti(false);
+            }
+        }
+
+        function oyunBitti(kazandi) {
+            document.getElementById('soru-alani').style.display = 'none';
+            document.getElementById('sonuc-alani').style.display = 'block';
+            
+            const baslik = document.getElementById('sonuc-baslik');
+            const skorYazisi = document.getElementById('sonuc-skor');
+
+            if (kazandi) {
+                baslik.innerText = "TEBRİKLER, KAZANDINIZ!";
+                baslik.style.color = "#38ef7d";
+                skorYazisi.innerText = `Harika! 20 soruyu da doğru bildin. Skorun: ${skor}`;
+            } else {
+                baslik.innerText = "YANLIŞ CEVAP, KAYBETTİNİZ!";
+                baslik.style.color = "#ff4757";
+                skorYazisi.innerText = `Elendiniz. Doğru cevap olmalıydı! Toplam Skorun: ${skor}`;
+            }
+        }
+
+        function yenidenBaslat() {
+            oyunuBaslat();
+        }
+    </script>
+</body>
+</html>
